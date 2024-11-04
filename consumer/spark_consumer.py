@@ -1,7 +1,4 @@
 import sys
-# append the path of the parent directory
-sys.path.append("/app")
-
 
 from pyspark.sql import SparkSession, Row
 from pyspark.sql.window import Window
@@ -10,11 +7,16 @@ from pyspark.sql.types import *
 import psycopg2
 from logs.logger import setup_logger
 import findspark
+
 findspark.init()
+
+
+# append the path of the parent directory
+sys.path.append("/app")
 
 KAFKA_TOPIC_NAME = "reddit-submissions"
 KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
-postgresql_properties  = {
+postgresql_properties = {
     "user": "admin",
     "password": "admin",
     "driver": "org.postgresql.Driver"
@@ -27,9 +29,10 @@ packages = [
     'org.apache.kafka:kafka-clients:2.8.1'
 ]
 
+
 def process_batch(batch_df, batch_id):
     logger.info("Processing the batch with ID: %s", batch_id)
-    
+
     try:
         connection = psycopg2.connect(
             host='postgresql',
@@ -39,11 +42,11 @@ def process_batch(batch_df, batch_id):
             password='admin'
         )
         batch_df.write.jdbc(
-                    url="jdbc:postgresql://postgresql:5432/reddit-postgres",
-                    table="public.reddit_submission_data",
-                    mode="append",
-                    properties=postgresql_properties
-                )
+            url="jdbc:postgresql://postgresql:5432/reddit-postgres",
+            table="public.reddit_submission_data",
+            mode="append",
+            properties=postgresql_properties
+        )
         # Find the most upvoted author
         most_upvoted_author = (
             batch_df.groupBy("author")
@@ -61,7 +64,8 @@ def process_batch(batch_df, batch_id):
             .limit(1)
             .collect()
         )
-        higher_downvotes_title = higher_downvotes_title[0]["title"] if higher_downvotes_title else None
+        higher_downvotes_title = higher_downvotes_title[0]["title"] \
+            if higher_downvotes_title else None
 
         # Find the title with the most num_comments
         most_num_comments_title = (
@@ -96,7 +100,8 @@ def process_batch(batch_df, batch_id):
         )
 
         logger.info(
-            "Batch ID: %s | Most Upvoted Author: %s | Higher Downvotes Title: %s | Most Num Comments Title: %s | Highest Score Title: %s | Highest Comment Karma Author: %s",
+            "Batch ID: %s | Most Upvoted Author: %s | Higher Downvotes Title: %s | Most Num Comments Title: %s | "
+            "Highest Score Title: %s | Highest Comment Karma Author: %s",
             batch_id,
             most_upvoted_author,
             higher_downvotes_title,
@@ -110,7 +115,7 @@ def process_batch(batch_df, batch_id):
             (batch_id, most_upvoted_author, higher_downvotes_title, most_num_comments_title, highest_score_title, highest_comment_karma_author)
             VALUES (%s, %s, %s, %s, %s, %s)
         """
-        
+
         cursor = connection.cursor()
         cursor.execute(insert_query, (
             batch_id,
@@ -129,7 +134,8 @@ def process_batch(batch_df, batch_id):
         logger.error("Error processing batch with ID %s: %s", batch_id, str(e))
 
     logger.info("Batch processing completed for ID: %s", batch_id)
-    
+
+
 if __name__ == "__main__":
     logger = setup_logger(__name__, 'consumer.log')
     spark = (
@@ -171,9 +177,3 @@ if __name__ == "__main__":
 
     query = info_df_fin.writeStream.foreachBatch(process_batch).start()
     query.awaitTermination()
-
-
-
-
-
-   
