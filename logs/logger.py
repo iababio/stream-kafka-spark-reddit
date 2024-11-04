@@ -1,4 +1,5 @@
 import sys
+
 # append the path of the parent directory
 sys.path.append("..")
 
@@ -9,9 +10,11 @@ LOGS_DIR = 'logs'
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
+
 def ensure_logs_directory():
     if not os.path.exists(LOGS_DIR):
         os.makedirs(LOGS_DIR)
+
 
 def setup_logger(logger_name, log_filename):
     ensure_logs_directory()

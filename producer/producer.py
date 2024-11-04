@@ -1,11 +1,10 @@
 #!/usr/bin/python3
+import sys
 
-from kafka import KafkaProducer
 from datetime import datetime
 import praw
 import secret_config as conf  # Configuration file for Reddit API keys
-import sys
-import time
+from kafka import KafkaProducer
 
 SUBREDDIT_TOPICS = ['politics', 'worldnews', 'technology', 'sports', 'funny', 'gaming', 'aww', 'pics', 'videos', 'news']
 
@@ -19,6 +18,7 @@ reddit = praw.Reddit(
     user_agent=conf.reddit_user_agent
 )
 
+
 def send_to_kafka(post):
     try:
         producer = KafkaProducer(bootstrap_servers=KAFKA_BROKER)
@@ -29,11 +29,13 @@ def send_to_kafka(post):
         print(f'Error sending to Kafka --> {e}')
         sys.exit(1)
 
+
 def stream_subreddits():
     for topic in SUBREDDIT_TOPICS:
         subreddit = reddit.subreddit(topic)
         for post in subreddit.stream.submissions():
             send_to_kafka(post)
+
 
 try:
     stream_subreddits()
