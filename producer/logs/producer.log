@@ -1,0 +1,10 @@
+
+2024-05-10 20:16:33 - INFO - Starting over again
+2024-05-10 20:16:34 - ERROR - An error occurred: expected string or bytes-like object
+2024-05-10 20:16:34 - INFO - Production done, sleeping for 60 seconds...
+2024-05-10 20:17:34 - INFO - Starting over again
+2024-05-10 20:17:34 - ERROR - An error occurred: expected string or bytes-like object
+2024-05-10 20:17:34 - INFO - Production done, sleeping for 60 seconds...
+2024-05-10 20:18:34 - INFO - Starting over again
+2024-05-10 20:18:34 - ERROR - An error occurred: expected string or bytes-like object
+2024-05-10 20:18:34 - INFO - Production done, sleeping for 60 seconds...
